@@ -1,16 +1,12 @@
 """Проверки загрузки и отклонения YAML-конфигурации."""
 
 import os
-import sys
 import tempfile
 import unittest
-from pathlib import Path
 
 import yaml
 
-_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_ROOT / "src"))
-
+from bootstrap import ROOT
 from depgraph.config import ConfigError, load_config
 from depgraph.constants import (
     KEY_FILTER_SUBSTRING,
@@ -96,10 +92,10 @@ class ConfigTests(unittest.TestCase):
 
     def test_loads_shipped_configs(self) -> None:
         """Примеры из репозитория проходят проверку."""
-        remote = load_config(str(_ROOT / "config.yaml"))
+        remote = load_config(str(ROOT / "config.yaml"))
         self.assertEqual(remote.package_name, "serde")
         tested = load_config(
-            str(_ROOT / "examples" / "test_repository.yaml"),
+            str(ROOT / "examples" / "test_repository.yaml"),
         )
         self.assertTrue(tested.test_repository_mode)
         self.assertTrue(os.path.isfile(tested.repository))
@@ -145,9 +141,10 @@ class ConfigTests(unittest.TestCase):
     def test_enforces_package_name_length(self) -> None:
         """Имя длиннее предела Cargo отклоняется."""
         data = dict(VALID)
-        data[KEY_PACKAGE_NAME] = "a" * MAX_PACKAGE_NAME_LENGTH
+        package_name = "a" * MAX_PACKAGE_NAME_LENGTH
+        data[KEY_PACKAGE_NAME] = package_name
         load_config(self.write_config(data))
-        data[KEY_PACKAGE_NAME] += "b"
+        data[KEY_PACKAGE_NAME] = package_name + "b"
         self.assertIn(KEY_PACKAGE_NAME, self.reject(data))
 
     def test_rejects_remote_repository_errors(self) -> None:
@@ -197,9 +194,10 @@ class ConfigTests(unittest.TestCase):
         """Слишком длинное имя файла изображения отклоняется."""
         stem_length = MAX_FILENAME_LENGTH - len(PNG_EXTENSION)
         data = dict(VALID)
-        data[KEY_GRAPH_IMAGE_NAME] = "a" * stem_length + PNG_EXTENSION
+        image_name = "a" * stem_length + PNG_EXTENSION
+        data[KEY_GRAPH_IMAGE_NAME] = image_name
         load_config(self.write_config(data))
-        data[KEY_GRAPH_IMAGE_NAME] = "a" + data[KEY_GRAPH_IMAGE_NAME]
+        data[KEY_GRAPH_IMAGE_NAME] = "a" + image_name
         self.assertIn(KEY_GRAPH_IMAGE_NAME, self.reject(data))
 
     def test_allows_empty_filter(self) -> None:
@@ -255,7 +253,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_error_examples_are_rejected(self) -> None:
         """Каждый файл в examples/errors завершается ошибкой."""
-        folder = _ROOT / "examples" / "errors"
+        folder = ROOT / "examples" / "errors"
         paths = sorted(folder.glob("*.yaml"))
         self.assertTrue(paths)
         for path in paths:

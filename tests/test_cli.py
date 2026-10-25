@@ -2,13 +2,9 @@
 
 import contextlib
 import io
-import sys
 import unittest
-from pathlib import Path
 
-_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(_ROOT / "src"))
-
+from bootstrap import ROOT
 from depgraph.cli import main
 from depgraph.constants import EXIT_CONFIG, EXIT_OK, REQUIRED_KEYS
 
@@ -19,7 +15,7 @@ class CliTests(unittest.TestCase):
     def test_prints_parameters_as_key_value(self) -> None:
         """Успешный запуск печатает все параметры."""
         stdout = io.StringIO()
-        path = str(_ROOT / "config.yaml")
+        path = str(ROOT / "config.yaml")
         with contextlib.redirect_stdout(stdout):
             code = main(["--config", path])
         lines = stdout.getvalue().splitlines()
@@ -33,7 +29,7 @@ class CliTests(unittest.TestCase):
     def test_prints_resolved_test_repository(self) -> None:
         """В тестовом режиме печатается найденный файл."""
         stdout = io.StringIO()
-        path = str(_ROOT / "examples" / "test_repository.yaml")
+        path = str(ROOT / "examples" / "test_repository.yaml")
         with contextlib.redirect_stdout(stdout):
             code = main(["--config", path])
         text = stdout.getvalue()
@@ -46,7 +42,7 @@ class CliTests(unittest.TestCase):
         """Ошибка параметра не смешивается с обычным выводом."""
         stdout = io.StringIO()
         stderr = io.StringIO()
-        path = str(_ROOT / "examples" / "errors" / "bad_url.yaml")
+        path = str(ROOT / "examples" / "errors" / "bad_url.yaml")
         with contextlib.redirect_stdout(stdout):
             with contextlib.redirect_stderr(stderr):
                 code = main(["--config", path])

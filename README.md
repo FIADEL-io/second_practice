@@ -50,6 +50,9 @@
 python -m pip install -r requirements.txt
 ```
 
+В зависимостях есть `types-PyYAML`: без него `mypy` считает
+импорт PyYAML нетипизированным.
+
 Запуск тестов из корня репозитория:
 
 ```bash
