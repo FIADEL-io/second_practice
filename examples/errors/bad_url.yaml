@@ -1,0 +1,5 @@
+package_name: serde
+repository: crates.io/serde
+test_repository_mode: false
+graph_image_name: serde.png
+filter_substring: ""

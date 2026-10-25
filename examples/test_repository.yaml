@@ -1,0 +1,6 @@
+# Режим тестового репозитория: путь считается от этого файла.
+package_name: A
+repository: ../tests/fixtures/graph.txt
+test_repository_mode: true
+graph_image_name: test-graph.png
+filter_substring: Z

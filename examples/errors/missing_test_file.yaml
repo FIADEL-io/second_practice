@@ -1,0 +1,5 @@
+package_name: A
+repository: missing/repo.txt
+test_repository_mode: true
+graph_image_name: test-graph.png
+filter_substring: ""
