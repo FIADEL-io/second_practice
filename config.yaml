@@ -1,4 +1,3 @@
-# Рабочий пример этапа 1: удалённый репозиторий Cargo.
 package_name: serde
 repository: https://github.com/serde-rs/serde
 test_repository_mode: false

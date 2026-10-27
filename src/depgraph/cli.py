@@ -1,5 +1,3 @@
-"""Командная строка этапа 1: вывод проверенных параметров."""
-
 from __future__ import annotations
 
 import argparse
@@ -10,11 +8,7 @@ from depgraph.constants import EXIT_CONFIG, EXIT_OK
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Загрузить конфигурацию и напечатать её параметры.
-
-    Сообщение об ошибке конфигурации пишется в stderr.
-    """
-    _configure_stdio()
+    _use_utf8()
     args = _parse_args(argv)
     try:
         config = load_config(args.config)
@@ -26,13 +20,11 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def format_parameters(config: AppConfig) -> str:
-    """Собрать параметры в строки «ключ: значение»."""
     lines = [f"{key}: {value}" for key, value in config.as_pairs()]
     return "\n".join(lines)
 
 
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
-    """Разобрать аргументы командной строки."""
     parser = argparse.ArgumentParser(
         prog="depgraph",
         description=(
@@ -48,8 +40,7 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def _configure_stdio() -> None:
-    """Печатать сообщения в UTF-8, если поток это позволяет."""
+def _use_utf8() -> None:
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
         if reconfigure is None:

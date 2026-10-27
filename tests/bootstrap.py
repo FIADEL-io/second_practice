@@ -1,5 +1,3 @@
-"""Подключает каталог src, чтобы тесты импортировали приложение."""
-
 import sys
 from pathlib import Path
 

@@ -1,5 +1,3 @@
-"""Проверки запуска приложения и формата вывода."""
-
 import contextlib
 import io
 import unittest
@@ -10,10 +8,8 @@ from depgraph.constants import EXIT_CONFIG, EXIT_OK, REQUIRED_KEYS
 
 
 class CliTests(unittest.TestCase):
-    """Печать параметров и код возврата при ошибке."""
 
     def test_prints_parameters_as_key_value(self) -> None:
-        """Успешный запуск печатает все параметры."""
         stdout = io.StringIO()
         path = str(ROOT / "config.yaml")
         with contextlib.redirect_stdout(stdout):
@@ -27,7 +23,6 @@ class CliTests(unittest.TestCase):
         self.assertIn("filter_substring: ", lines)
 
     def test_prints_resolved_test_repository(self) -> None:
-        """В тестовом режиме печатается найденный файл."""
         stdout = io.StringIO()
         path = str(ROOT / "examples" / "test_repository.yaml")
         with contextlib.redirect_stdout(stdout):
@@ -39,7 +34,6 @@ class CliTests(unittest.TestCase):
         self.assertIn("graph.txt", text)
 
     def test_config_error_goes_to_stderr(self) -> None:
-        """Ошибка параметра не смешивается с обычным выводом."""
         stdout = io.StringIO()
         stderr = io.StringIO()
         path = str(ROOT / "examples" / "errors" / "bad_url.yaml")
@@ -52,7 +46,6 @@ class CliTests(unittest.TestCase):
         self.assertIn("repository", stderr.getvalue())
 
     def test_missing_file_is_config_error(self) -> None:
-        """Несуществующий --config завершает программу с ошибкой."""
         stderr = io.StringIO()
         with contextlib.redirect_stderr(stderr):
             code = main(["--config", "no-such-config.yaml"])

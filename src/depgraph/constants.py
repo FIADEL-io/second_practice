@@ -1,9 +1,3 @@
-"""Имена параметров и числовые ограничения конфигурации.
-
-Длина имени пакета ограничена правилом Cargo. Длина имени файла
-изображения ограничена типичным пределом одного компонента пути.
-"""
-
 import re
 
 KEY_PACKAGE_NAME = "package_name"
@@ -32,11 +26,6 @@ IMAGE_NAME_PATTERN = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9._-]*\.png$",
     re.IGNORECASE,
 )
-
-TYPE_NAMES = {
-    str: "строка",
-    bool: "логический",
-}
 
 EXIT_OK = 0
 EXIT_CONFIG = 1
