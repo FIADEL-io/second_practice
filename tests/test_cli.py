@@ -1,10 +1,11 @@
 import contextlib
 import io
 import unittest
+from unittest.mock import patch
 
 from bootstrap import ROOT
 from depgraph.cli import main
-from depgraph.constants import EXIT_CONFIG, EXIT_OK, REQUIRED_KEYS
+from depgraph.constants import EXIT_CONFIG, EXIT_OK
 
 
 class CliTests(unittest.TestCase):
@@ -12,11 +13,18 @@ class CliTests(unittest.TestCase):
     def test_prints_parameters_as_key_value(self) -> None:
         stdout = io.StringIO()
         path = str(ROOT / "config.yaml")
-        with contextlib.redirect_stdout(stdout):
-            code = main(["--config", path])
+        deps = [("serde_core", "=1.0.229"), ("serde_derive", "1")]
+        with patch(
+            "depgraph.cli.load_direct_dependencies",
+            return_value=deps,
+        ):
+            with contextlib.redirect_stdout(stdout):
+                code = main(["--config", path])
         lines = stdout.getvalue().splitlines()
         self.assertEqual(code, EXIT_OK)
-        self.assertEqual(len(lines), len(REQUIRED_KEYS))
+        self.assertIn("прямые зависимости:", lines)
+        self.assertIn("serde_core =1.0.229", lines)
+        self.assertIn("serde_derive 1", lines)
         self.assertIn("package_name: serde", lines)
         self.assertIn("test_repository_mode: false", lines)
         self.assertIn("graph_image_name: serde.png", lines)
