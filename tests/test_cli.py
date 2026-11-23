@@ -1,10 +1,12 @@
 import contextlib
 import io
 import unittest
+from unittest.mock import patch
 
 from bootstrap import ROOT
 from depgraph.cli import main
-from depgraph.constants import EXIT_CONFIG, EXIT_OK, REQUIRED_KEYS
+from depgraph.constants import EXIT_CONFIG, EXIT_OK
+from depgraph.graph import Graph
 
 
 class CliTests(unittest.TestCase):
@@ -12,15 +14,37 @@ class CliTests(unittest.TestCase):
     def test_prints_parameters_as_key_value(self) -> None:
         stdout = io.StringIO()
         path = str(ROOT / "config.yaml")
-        with contextlib.redirect_stdout(stdout):
-            code = main(["--config", path])
+        deps = [("serde_core", "=1.0.229"), ("serde_derive", "1")]
+        graph = Graph(
+            {
+                "serde": ("serde_core", "serde_derive"),
+                "serde_core": (),
+                "serde_derive": (),
+            },
+            ("serde", "serde_core", "serde_derive"),
+            (),
+        )
+        with patch(
+            "depgraph.cli.load_direct_dependencies",
+            return_value=deps,
+        ):
+            with patch(
+                "depgraph.cli.build_cargo_graph",
+                return_value=graph,
+            ):
+                with contextlib.redirect_stdout(stdout):
+                    code = main(["--config", path])
         lines = stdout.getvalue().splitlines()
         self.assertEqual(code, EXIT_OK)
-        self.assertEqual(len(lines), len(REQUIRED_KEYS))
+        self.assertIn("прямые зависимости:", lines)
+        self.assertIn("serde_core =1.0.229", lines)
+        self.assertIn("serde_derive 1", lines)
         self.assertIn("package_name: serde", lines)
         self.assertIn("test_repository_mode: false", lines)
         self.assertIn("graph_image_name: serde.png", lines)
         self.assertIn("filter_substring: ", lines)
+        self.assertIn("граф зависимостей:", lines)
+        self.assertIn("serde -> serde_core, serde_derive", lines)
 
     def test_prints_resolved_test_repository(self) -> None:
         stdout = io.StringIO()
@@ -32,6 +56,15 @@ class CliTests(unittest.TestCase):
         self.assertIn("package_name: A", text)
         self.assertIn("test_repository_mode: true", text)
         self.assertIn("graph.txt", text)
+
+    def test_cycle_example_prints_cycle(self) -> None:
+        stdout = io.StringIO()
+        path = str(ROOT / "examples" / "test_cycle.yaml")
+        with contextlib.redirect_stdout(stdout):
+            code = main(["--config", path])
+        text = stdout.getvalue()
+        self.assertEqual(code, EXIT_OK)
+        self.assertIn("цикл: A -> B -> C -> A", text)
 
     def test_config_error_goes_to_stderr(self) -> None:
         stdout = io.StringIO()

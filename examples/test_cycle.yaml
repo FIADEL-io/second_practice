@@ -1,0 +1,5 @@
+package_name: A
+repository: graphs/cycle.txt
+test_repository_mode: true
+graph_image_name: cycle.png
+filter_substring: ""
